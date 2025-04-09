@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.FinalProject.dto.StudentDto;
@@ -18,25 +19,25 @@ public class StudentController {
 	
 	@Autowired StudentService studentService;
 	
-	@GetMapping("/student")
+	@GetMapping("/students")
 	public List<StudentDto> getStudentList(){
 		return studentService.getAllStudents();
 	}
 	
-	@PostMapping("/student/add")
+	@PostMapping("/students")
 	public String addStudent(@RequestBody StudentDto dto) {
 		studentService.insertStudent(dto);
 		return "success!";
 	}
 	
-	@PatchMapping("/student/edit")
+	@PatchMapping("/students/{id}")
 	public String editStudent(@RequestBody StudentDto dto) {
 		studentService.updateStudent(dto);
 		return "success!";
 	}
 	
-	@DeleteMapping("/student/delete")
-	public String deleteStudent(int id) {
+	@DeleteMapping("/students/{id}")
+	public String deleteStudent(@PathVariable int id) {
 		studentService.deleteStudent(id);
 		return "success!";
 	}
