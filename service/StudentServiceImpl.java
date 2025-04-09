@@ -22,8 +22,8 @@ public class StudentServiceImpl implements StudentService{
 
 	@Override
 	public int insertStudent(StudentDto dto) {
-		int result = studentMapper.insert(dto);
-    		studentMapper.updateCount(dto.getStorenum());
+		int result = studentMapper.insert(dto); // 학생 추가 후
+    		studentMapper.updateCount(dto.getStorenum()); // 학생 수 업데이트
     		return result;
 	}
 
@@ -35,9 +35,9 @@ public class StudentServiceImpl implements StudentService{
 
 	@Override
 	public int deleteStudent(int studentId) {
-		int result = studentMapper.delete(studentId);
+		int result = studentMapper.delete(studentId); // 학생 삭제 후
 		StudentDto dto = studentMapper.getById(studentId); // storenum 을 알아야
-    		studentMapper.updateCount(dto.getStorenum()); //updateCount 가능
+    		studentMapper.updateCount(dto.getStorenum()); // 학생 수 업데이트
     		return result;
 	}
 	
