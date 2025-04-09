@@ -9,8 +9,8 @@ import com.example.FinalProject.dto.TeacherDto;
 @Mapper
 public interface TeacherMapper {
 	List<TeacherDto> getAll();
-	TeacherDto getById(int id);
+	TeacherDto getById(int teacherId);
 	int insert(TeacherDto dto);
 	int update(TeacherDto dto);
-	int delete(int id);
+	int delete(int teacherId);
 }
