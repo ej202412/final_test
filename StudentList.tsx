@@ -1,35 +1,48 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Table } from 'react-bootstrap';
+import RegisterModal from './RegisterModal';
+import UpdateModal from './UpdateModal';
 
-function StudentList(props) {
+function StudentList() {
+    const [students, setStudents] = useState([]);
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [showRegister, setShowRegister] = useState(false);
+    const [editingStudent, setEditingStudent] = useState(null);
 
-    const [students, setStudents] = useState([]); //전체 학생 리스트
-    
-    const fetchData = ()=>{
+    const fetchData = () => {
         axios.get("/student")
-        .then(res=>
-            console.log(res.data)
-            //setStudents([...students, res.data])
-        )
-        .catch(err=>console.log(err));
-    }
+            .then(res => setStudents(res.data))
+            .catch(err => console.log(err));
+    };
 
-    const RegisterModal = 
-
-    useEffect(()=>{
+    useEffect(() => {
         fetchData();
-    }, [])
+    }, []);
+
+    const toggleCheckbox = (id) => {
+        setSelectedIds(prev =>
+            prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+        );
+    };
+
+    const deleteSelected = () => {
+        selectedIds.forEach(id => {
+            axios.delete(`/student/delete?id=${id}`)
+                .then(fetchData)
+                .catch(err => console.log(err));
+        });
+        setSelectedIds([]);
+    };
 
     return (
         <div>
             <h1>학생 관리 페이지</h1>
-        
             <div className="right">
-                <button>
-                학생 등록
-                </button>
+                <button onClick={() => setShowRegister(true)}>학생 등록</button>
+                <button onClick={deleteSelected} disabled={selectedIds.length === 0}>선택 삭제</button>
             </div>
+
             <Table>
                 <thead className="table-dark">
                     <tr>
@@ -43,24 +56,43 @@ function StudentList(props) {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>
-                            <input type="checkbox" className="checkbox" />
-                        </td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                    </tr>
-                   
-                    
+                    {students.map((student, index) => (
+                        <tr key={student.studentId}>
+                            <td>
+                                <input
+                                    type="checkbox"
+                                    checked={selectedIds.includes(student.studentId)}
+                                    onChange={() => toggleCheckbox(student.studentId)}
+                                />
+                            </td>
+                            <td>{index + 1}</td>
+                            <td>{student.name}</td>
+                            <td>{student.phone}</td>
+                            <td>{student.email}</td>
+                            <td>정상</td>
+                            <td>
+                                <button onClick={() => setEditingStudent(student)}>보기</button>
+                            </td>
+                        </tr>
+                    ))}
                 </tbody>
             </Table>
 
-            </div>
-    
+            {showRegister && (
+                <RegisterModal
+                    onClose={() => setShowRegister(false)}
+                    onRegister={fetchData}
+                />
+            )}
+
+            {editingStudent && (
+                <UpdateModal
+                    student={editingStudent}
+                    onClose={() => setEditingStudent(null)}
+                    onUpdate={fetchData}
+                />
+            )}
+        </div>
     );
 }
 
