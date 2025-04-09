@@ -22,20 +22,23 @@ public class StudentServiceImpl implements StudentService{
 
 	@Override
 	public int insertStudent(StudentDto dto) {
-		// TODO Auto-generated method stub
-		return studentMapper.insert(dto);
+		int result = studentMapper.insert(dto);
+    		studentMapper.updateCount(dto.getStorenum());
+    		return result;
 	}
 
 	@Override
 	public int updateStudent(StudentDto dto) {
-		// TODO Auto-generated method stub
-		return studentMapper.update(dto);
+		int result = studentMapper.update(dto);		
+		return result; 
 	}
 
 	@Override
 	public int deleteStudent(int studentId) {
-		// TODO Auto-generated method stub
-		return studentMapper.delete(studentId);
+		int result = studentMapper.delete(studentId);
+		StudentDto dto = studentMapper.getById(studentId); // storenum 을 알아야
+    		studentMapper.updateCount(dto.getStorenum()); //updateCount 가능
+    		return result;
 	}
 	
 }
