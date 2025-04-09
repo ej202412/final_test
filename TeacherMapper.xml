@@ -6,20 +6,20 @@
 	</select>
 	<select id="getById" parameterType="int" resultType="TeacherDto">
 		SELECT * FROM teacher
-		WHERE teacher_id=#{id}
+		WHERE teacher_id=#{teacherId}
 	</select>
 	<insert id="insert" parameterType="TeacherDto">
 		INSERT INTO teacher
-		(teacher_id, name, storenum, lecture_id, phone, email, salary)
-		VALUES(#{teacherId}, #{name}, #{storeNum}, #{lectureId}, #{phone}, #{email}, #{salary})
+		(teacher_id, name, storenum, phone, email, salary)
+		VALUES(#{teacherId}, #{name}, #{storeNum}, #{phone}, #{email}, #{salary})
 	</insert>	
 	<update id="update" parameterType="TeacherDto">
 		UPDATE teacher
 		SET name=#{name}, storenum=#{storenum}, lecture_id=#{lectureId}, phone=#{phone}, email=#{email}, salary=#{salary}
-		WHERE teacher_id=#{id}
+		WHERE teacher_id=#{teacherId}
 	</update>
 	<delete id="delete" parameterType="int">
 		DELETE FROM teacher
-		WHERE  teacher_id=#{id}
+		WHERE  teacher_id=#{teacherId}
 	</delete>	
 </mapper>
