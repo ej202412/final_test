@@ -6,7 +6,7 @@
 	</select>
 	<select id="getById" parameterType="int" resultType="StudentDto">
 		SELECT * FROM student
-		WHERE student_id=#{id}
+		WHERE student_id=#{studentId}
 	</select>
 	<insert id="insert" parameterType="StudentDto">
 		INSERT INTO student
@@ -16,11 +16,11 @@
 	<update id="update" parameterType="StudentDto">
 		UPDATE student
 		SET name=#{name}, storenum=#{storenum}, class_id=#{classId}, phone=#{phone}, email=#{email}
-		WHERE student_id=#{id}
+		WHERE student_id=#{studentId}
 	</update>
 	<delete id="delete" parameterType="int">
 		DELETE FROM student
-		WHERE student_id=#{id}
+		WHERE student_id=#{studentId}
 	</delete>
 	<update id="updateCount" parameterType="int">
 	UPDATE class c
