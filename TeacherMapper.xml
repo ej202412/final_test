@@ -1,25 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.FinalProject.mappers.TeacherMapper">
-	<select id="getAll" resultType="TeacherDto">
-		SELECT * FROM teacher
+<mapper namespace="com.example.FinalProject.mapper.TeacherMapper"> 
+	<!-- 특정 강사의 전체 수업 이력 가져오기 -->
+<select id="getClassHistory" parameterType="int" resultType="TeacherDto">
+  SELECT 
+    t.teacherid,
+    t.name,
+    
+    c.startdate,
+    c.enddate,
+    c.starttime,
+    c.endtime,
+    LISTAGG(c.classname, ', ') WITHIN GROUP (ORDER BY c.classname) AS classNames,
+    SELECT COUNT(*)FROM tb_student_class sc WHERE sc.classid = c.classid AS studentCount
+  FROM tb_teacher t
+  LEFT JOIN tb_class c ON t.teacherid = c.teacherid
+  LEFT JOIN tb_student_class sc ON sc.classid = c.classid
+  WHERE 
+  	t.teacherid = #{teacherId}
+  	AND c.status IN ('START','END') <!-- 진행중, 종강 -->
+  GROUP BY t.teacherid, t.name, c.startdate, c.enddate, c.starttime, c.endtime, studentCount
+</select>
+<!-- LEFT JOIN 하게 되면 sc.classid 가 NULL 인 경우 classname 은 NULL -->
+<!-- 재직자 목록에 현재 담당 중인 수업만 가져오기 -->
+<select id="getTeacherList" parameterType="int" resultType="StudentDto">
+  SELECT 
+    s.studentid,
+    s.name,
+    s.phone,
+    s.status,
+    b.bname AS statusName
+    LISTAGG(c.classname, ', ') WITHIN GROUP (ORDER BY c.classname) AS classNames
+  FROM tb_student s
+  LEFT JOIN tb_student_class sc ON s.studentid = sc.studentid
+  LEFT JOIN tb_class c ON sc.classid = c.classid
+  LEFT JOIN tb_bcode b ON s.status = b.bcode
+  WHERE 
+    s.storenum = #{storeNum}
+    AND s.status = 'STUDY' <!-- 하드 코딩 대신 테이블 join -->
+    AND c.status IN ('READY', 'START') <!-- 모집마감, 진행중 -->
+  GROUP BY s.studentid, s.name, s.phone, s.status, b.bname
+</select>
+<!-- 퇴직자 목록 가져오기 -->
+<select id="getQuitStudentList" parameterType="int" resultType="StudentDto">
+  SELECT 
+    s.studentid,
+    s.name,
+    s.phone,
+    s.status,
+    b.bname AS statusName
+    
+  FROM tb_student s
+  LEFT JOIN tb_student_class sc ON s.studentid = sc.studentid
+  LEFT JOIN tb_class c ON sc.classid = c.classid
+  LEFT JOIN tb_bcode b ON s.status = b.bcode
+  WHERE 
+    s.storenum = #{storeNum}
+    AND s.status = 'S_QUIT' <!-- 하드 코딩 대신 테이블 join -->
+    
+  GROUP BY s.studentid, s.name, s.phone, s.status, b.bname
+</select>
+	<select id="getTeacherById" parameterType="int" resultType="TeacherDto">
+		SELECT * 
+		FROM tb_teacher
+		WHERE teacherid=#{teacherId}
 	</select>
-	<select id="getById" parameterType="int" resultType="TeacherDto">
-		SELECT * FROM teacher
-		WHERE teacher_id=#{teacherId}
-	</select>
-	<insert id="insert" parameterType="TeacherDto">
-		INSERT INTO teacher
-		(teacher_id, name, storenum, phone, email, salary)
-		VALUES(#{teacherId}, #{name}, #{storeNum}, #{phone}, #{email}, #{salary})
+	<insert id="insert" parameterType="int">
+		INSERT INTO tb_teacher
+		(teacherid, name, storenum, phone, salary, status, birth)
+		VALUES(teacher_seq.NEXTVAL, #{name}, #{storeNum}, #{phone}, #{salary}, #{status}, #{birth})
 	</insert>	
-	<update id="update" parameterType="TeacherDto">
-		UPDATE teacher
-		SET name=#{name}, storenum=#{storenum}, lecture_id=#{lectureId}, phone=#{phone}, email=#{email}, salary=#{salary}
-		WHERE teacher_id=#{teacherId}
+	<update id="update" parameterType="int">
+		UPDATE tb_teacher
+		SET name=#{name}, phone=#{phone}, salary=#{salary}, status=#{status}, birth=#{birth}
+		WHERE teacherid=#{teacherId}
 	</update>
+	<!--  
 	<delete id="delete" parameterType="int">
-		DELETE FROM teacher
-		WHERE  teacher_id=#{teacherId}
+		DELETE FROM tb_teacher
+		WHERE teacherid=#{teacherId}
 	</delete>	
+	-->
 </mapper>

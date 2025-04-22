@@ -1,34 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.FinalProject.mappers.StudentMapper">
-	<select id="getAll" resultType="StudentDto">
-		SELECT * FROM student
+<mapper namespace="com.example.FinalProject.mapper.StudentMapper">
+	
+	<select id="getStudentById" parameterType="int" resultType="StudentDto">
+		SELECT *
+		FROM tb_student s
+		WHERE studentid=#{studentId}
 	</select>
-	<select id="getById" parameterType="int" resultType="StudentDto">
-		SELECT * FROM student
-		WHERE student_id=#{studentId}
-	</select>
-	<insert id="insert" parameterType="StudentDto">
-		INSERT INTO student
-		(student_id, name, storenum, class_id, phone, email)
-		VALUES(#{studentId}, #{name}, #{storenum}, #{classId}, #{phone}, #{email})
+	<insert id="insert" parameterType="int">	
+		INSERT INTO tb_student
+		(studentid, name, storenum, phone, status)
+		VALUES(student_seq.NEXTVAL, #{name}, #{storeNum}, #{phone}, #{status})		
 	</insert>	
-	<update id="update" parameterType="StudentDto">
-		UPDATE student
-		SET name=#{name}, storenum=#{storenum}, class_id=#{classId}, phone=#{phone}, email=#{email}
-		WHERE student_id=#{studentId}
+	<update id="update" parameterType="int">
+		UPDATE tb_student
+		SET name=#{name}, storenum=#{storeNum}, phone=#{phone}, status=#{status}
+		WHERE studentid=#{studentId}
 	</update>
+	<!-- 
 	<delete id="delete" parameterType="int">
-		DELETE FROM student
-		WHERE student_id=#{studentId}
+		DELETE FROM tb_student
+		WHERE studentid=#{studentId}
 	</delete>
+	
 	<update id="updateCount" parameterType="int">
-	UPDATE class c
-	SET current_student = (
-		SELECT COUNT(*)
-		FROM student s
-		WHERE s.class_id = c.class_id
-	)
-	WHERE storenum=#{storenum}
+		UPDATE tb_class c
+		SET currentstudent = (
+			SELECT COUNT(*)
+			FROM tb_student s
+			WHERE s.classid = c.classid
+		)
+		WHERE storenum=#{storeNum}
 	</update>	
+	  
+	<select id="getClassName" parameterType="int" resultType="string">
+		SELECT description FROM class
+		WHERE classid=#{classId}
+	</select>
+	
+	<select id="getClassList" parameterType="int" resultType="ClassDto">
+		SELECT classid, description 
+		FROM tb_class
+		WHERE storeNum=#{storeNum}
+	</select>
+	-->
+	<!-- 특정 학생의 전체 수강 이력 가져오기 -->
+<select id="getClassHistory" parameterType="int" resultType="StudentDto">
+  SELECT 
+    s.studentid,
+    s.name,
+    c.classid,
+    c.classname,
+    c.teacherid,
+    t.name AS teacherName,
+    c.startdate,
+    c.enddate,
+    c.starttime,
+    c.endtime
+  FROM tb_student s
+  LEFT JOIN tb_student_class sc ON s.studentid = sc.studentid
+  LEFT JOIN tb_class c ON sc.classid = c.classid
+  LEFT JOIN tb_teacher t ON c.teacherid = t.teacherid
+  WHERE 
+  	s.studentid = #{studentId}
+  	AND c.status IN ('START','END') <!-- 진행중, 종강 -->
+  ORDER BY c.enddate, c.endtime DESC
+</select>
+<!-- LEFT JOIN 하게 되면 sc.classid 가 NULL 인 경우 classname 은 NULL -->
+<!-- 재원생 목록에 현재 수강 중인 수업만 가져오기 -->
+<select id="getStudentList" parameterType="int" resultType="StudentDto">
+  SELECT 
+    s.studentid,
+    s.name,
+    s.phone,
+    s.status,
+    b.bname AS statusName
+    LISTAGG(c.classname, ', ') WITHIN GROUP (ORDER BY c.classname) AS classNames
+  FROM tb_student s
+  LEFT JOIN tb_student_class sc ON s.studentid = sc.studentid
+  LEFT JOIN tb_class c ON sc.classid = c.classid
+  LEFT JOIN tb_bcode b ON s.status = b.bcode
+  WHERE 
+    s.storenum = #{storeNum}
+    AND s.status = 'STUDY' <!-- 하드 코딩 대신 테이블 join -->
+    AND c.status IN ('READY', 'START') <!-- 모집마감, 진행중 -->
+  GROUP BY s.studentid, s.name, s.phone, s.status, b.bname
+</select>
+<!-- 퇴원생 목록 가져오기 -->
+<select id="getQuitStudentList" parameterType="int" resultType="StudentDto">
+  SELECT 
+    s.studentid,
+    s.name,
+    s.phone,
+    s.status,
+    b.bname AS statusName
+    
+  FROM tb_student s
+  LEFT JOIN tb_student_class sc ON s.studentid = sc.studentid
+  LEFT JOIN tb_class c ON sc.classid = c.classid
+  LEFT JOIN tb_bcode b ON s.status = b.bcode
+  WHERE 
+    s.storenum = #{storeNum}
+    AND s.status = 'S_QUIT' <!-- 하드 코딩 대신 테이블 join -->
+    
+  GROUP BY s.studentid, s.name, s.phone, s.status, b.bname
+</select>
 </mapper>
