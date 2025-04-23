@@ -20,28 +20,42 @@ public class TeacherController {
 	
 	@Autowired TeacherService teacherService;
 	
+	//테스트용
+	@GetMapping("/teachers/ping")
+	public String ping() {
+		return "pong";
+	}
+	
+	// teachers?storeNum=1
 	@GetMapping("/teachers")
-	public List<TeacherDto> getTeacherList(@RequestParam int storeNum){
-		return teacherService.getAllTeachers(storeNum);
+	public List<TeacherDto> getAllTeachers(@RequestParam String storeName){
+		return teacherService.getAllTeachers(storeName);
 	}
 	
+	// teachers
 	@PostMapping("/teachers")
-	public String addTeacher(@RequestBody TeacherDto dto) {
-		teacherService.updateTeacher(dto);
+	public String insertTeacher(@RequestBody TeacherDto dto) {
+		teacherService.insertTeacher(dto);
 		return "success!";
 	}
 	
-	@PatchMapping("/teachers/{id}")
-	public String editTeacher(@PathVariable int id, @RequestBody TeacherDto dto) {
-		dto.setTeacherId(id);
+	// teachers/1
+	@PatchMapping("/teachers/{teacherId}")
+	public String updateTeacher(@PathVariable int teacherId, @RequestBody TeacherDto dto) {
+		dto.setTeacherId(teacherId);
 		teacherService.updateTeacher(dto);
 		return "success!";
 	}
-	
+	/*
 	@DeleteMapping("/teachers/{id}")
 	public String deleteTeacher(@PathVariable int id) {
 		teacherService.deleteTeacher(id);
 		return "success!";
 	}
-	
+	*/
+	// teachers/class?teacherId=1
+	@GetMapping("/teachers/class")
+	public List<TeacherDto> getAllClasses(@RequestParam int teacherId){
+		return teacherService.getAllClasses(teacherId);
+	}
 }

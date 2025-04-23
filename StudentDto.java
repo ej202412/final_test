@@ -15,12 +15,21 @@ import lombok.NoArgsConstructor;
 public class StudentDto {
 	private int studentId;
 	private String name;
-	private int storeNum;
+	private String storeName;
 	private String phone;
-	private String status;
+	private String status; // bcode : 'STUDY', 'S_QUIT'
+	private String statusName; // bname : '재원', '퇴원'
 	
-	private String statusName; // 상태값 이름
-	//class 정보 가져오기
+	// 학생 목록에서 현재 수강 수업 정보(LISTAGG)
 	private String classNames;
+
+	// 학생 수강 이력 정보
 	private int classId;
+	private String className;
+	private int teacherId;
+	private String teacherName;
+	private String startdate;
+	private String enddate;
+	private String starttime;
+	private String endtime;
 }

@@ -7,14 +7,14 @@
 		FROM tb_student s
 		WHERE studentid=#{studentId}
 	</select>
-	<insert id="insert" parameterType="int">	
+	<insert id="insert" parameterType="StudentDto">	
 		INSERT INTO tb_student
-		(studentid, name, storenum, phone, status)
-		VALUES(student_seq.NEXTVAL, #{name}, #{storeNum}, #{phone}, #{status})		
+		(studentid, name, storename, phone, status)
+		VALUES(student_seq.NEXTVAL, #{name}, #{storeName}, #{phone}, #{status})		
 	</insert>	
-	<update id="update" parameterType="int">
+	<update id="update" parameterType="StudentDto">
 		UPDATE tb_student
-		SET name=#{name}, storenum=#{storeNum}, phone=#{phone}, status=#{status}
+		SET name=#{name}, storename=#{storeName}, phone=#{phone}, status=#{status}
 		WHERE studentid=#{studentId}
 	</update>
 	<!-- 
@@ -44,7 +44,7 @@
 		WHERE storeNum=#{storeNum}
 	</select>
 	-->
-	<!-- 특정 학생의 전체 수강 이력 가져오기 -->
+<!-- 특정 학생(재원생, 퇴원생 모두 포함)의 전체 수강 이력 가져오기 -->
 <select id="getClassHistory" parameterType="int" resultType="StudentDto">
   SELECT 
     s.studentid,
@@ -68,41 +68,43 @@
 </select>
 <!-- LEFT JOIN 하게 되면 sc.classid 가 NULL 인 경우 classname 은 NULL -->
 <!-- 재원생 목록에 현재 수강 중인 수업만 가져오기 -->
-<select id="getStudentList" parameterType="int" resultType="StudentDto">
+<select id="getStudentList" parameterType="String" resultType="StudentDto">
   SELECT 
     s.studentid,
     s.name,
     s.phone,
+    s.storename,
     s.status,
-    b.bname AS statusName
+    b.bname AS statusName,
     LISTAGG(c.classname, ', ') WITHIN GROUP (ORDER BY c.classname) AS classNames
   FROM tb_student s
   LEFT JOIN tb_student_class sc ON s.studentid = sc.studentid
-  LEFT JOIN tb_class c ON sc.classid = c.classid
-  LEFT JOIN tb_bcode b ON s.status = b.bcode
+  LEFT JOIN tb_class c ON sc.classid = c.classid AND c.status IN ('READY', 'START') <!-- 모집마감, 진행중 -->
+  LEFT JOIN tb_bcode b ON s.status = b.bcode AND b.acode = 'STUDENT' <!-- 학생 상태 관리 코드 -->
   WHERE 
-    s.storenum = #{storeNum}
-    AND s.status = 'STUDY' <!-- 하드 코딩 대신 테이블 join -->
-    AND c.status IN ('READY', 'START') <!-- 모집마감, 진행중 -->
-  GROUP BY s.studentid, s.name, s.phone, s.status, b.bname
+    s.storename = #{storeName}
+    AND s.status = 'STUDY' 
+    
+  GROUP BY s.studentid, s.name, s.phone, s.storename, s.status, b.bname
 </select>
 <!-- 퇴원생 목록 가져오기 -->
-<select id="getQuitStudentList" parameterType="int" resultType="StudentDto">
+<select id="getQuitStudentList" parameterType="String" resultType="StudentDto">
   SELECT 
     s.studentid,
     s.name,
     s.phone,
+    s.storename,
     s.status,
-    b.bname AS statusName
-    
+    b.bname AS statusName,
+    LISTAGG(c.classname, ', ') WITHIN GROUP (ORDER BY c.classname) AS classNames
   FROM tb_student s
-  LEFT JOIN tb_student_class sc ON s.studentid = sc.studentid
-  LEFT JOIN tb_class c ON sc.classid = c.classid
-  LEFT JOIN tb_bcode b ON s.status = b.bcode
+  LEFT JOIN tb_student_class sc ON s.studentid = sc.studentid 
+  LEFT JOIN tb_class c ON sc.classid = c.classid AND c.status IN ('START','END')
+  LEFT JOIN tb_bcode b ON s.status = b.bcode AND b.acode = 'STUDENT' <!-- 학생 상태 관리 코드 -->
   WHERE 
-    s.storenum = #{storeNum}
-    AND s.status = 'S_QUIT' <!-- 하드 코딩 대신 테이블 join -->
+    s.storename = #{storeName}
+    AND s.status = 'S_QUIT'
     
-  GROUP BY s.studentid, s.name, s.phone, s.status, b.bname
+  GROUP BY s.studentid, s.name, s.phone, s.storename, s.status, b.bname
 </select>
 </mapper>

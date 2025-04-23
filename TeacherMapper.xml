@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.FinalProject.mapper.TeacherMapper"> 
-	<!-- 특정 강사의 전체 수업 이력 가져오기 -->
+<!-- 특정 강사의 전체 수업 이력 가져오기 -->
 <select id="getClassHistory" parameterType="int" resultType="TeacherDto">
   SELECT 
     t.teacherid,
@@ -11,7 +11,7 @@
     c.enddate,
     c.starttime,
     c.endtime,
-    LISTAGG(c.classname, ', ') WITHIN GROUP (ORDER BY c.classname) AS classNames,
+   
     SELECT COUNT(*)FROM tb_student_class sc WHERE sc.classid = c.classid AS studentCount
   FROM tb_teacher t
   LEFT JOIN tb_class c ON t.teacherid = c.teacherid
@@ -19,60 +19,83 @@
   WHERE 
   	t.teacherid = #{teacherId}
   	AND c.status IN ('START','END') <!-- 진행중, 종강 -->
-  GROUP BY t.teacherid, t.name, c.startdate, c.enddate, c.starttime, c.endtime, studentCount
+  GROUP BY 
+	t.teacherid, 
+	t.name, 
+  	c.startdate, 
+	c.enddate, 
+	c.starttime, 
+	c.endtime, 
+	
+  ORDER BY c.enddate, c.endtime DESC
 </select>
 <!-- LEFT JOIN 하게 되면 sc.classid 가 NULL 인 경우 classname 은 NULL -->
 <!-- 재직자 목록에 현재 담당 중인 수업만 가져오기 -->
-<select id="getTeacherList" parameterType="int" resultType="StudentDto">
+<select id="getTeacherList" parameterType="String" resultType="TeacherDto">
   SELECT 
-    s.studentid,
-    s.name,
-    s.phone,
-    s.status,
-    b.bname AS statusName
+    t.teacherid,
+    t.name,
+    t.birth,
+    t.phone,
+    t.storename,
+    t.status,
+    b.bname AS statusName,
     LISTAGG(c.classname, ', ') WITHIN GROUP (ORDER BY c.classname) AS classNames
-  FROM tb_student s
-  LEFT JOIN tb_student_class sc ON s.studentid = sc.studentid
-  LEFT JOIN tb_class c ON sc.classid = c.classid
-  LEFT JOIN tb_bcode b ON s.status = b.bcode
+  FROM tb_teacher t
+  LEFT JOIN tb_class c ON t.classid = c.classid AND c.status IN ('READY', 'START') <!-- 모집마감, 진행중 -->
+  LEFT JOIN tb_bcode b ON t.status = b.bcode AND b.acode = 'TEACHER'
   WHERE 
-    s.storenum = #{storeNum}
-    AND s.status = 'STUDY' <!-- 하드 코딩 대신 테이블 join -->
-    AND c.status IN ('READY', 'START') <!-- 모집마감, 진행중 -->
-  GROUP BY s.studentid, s.name, s.phone, s.status, b.bname
+    t.storename = #{storeName}
+    AND t.status = 'WORK' 
+   
+  GROUP BY
+  	t.teacherid,
+    t.name,
+    t.birth,
+    t.phone,
+    t.storename,
+    t.status,
+    statusName
 </select>
 <!-- 퇴직자 목록 가져오기 -->
-<select id="getQuitStudentList" parameterType="int" resultType="StudentDto">
+<select id="getQuitTeacherList" parameterType="String" resultType="TeacherDto">
   SELECT 
-    s.studentid,
-    s.name,
-    s.phone,
-    s.status,
-    b.bname AS statusName
-    
-  FROM tb_student s
-  LEFT JOIN tb_student_class sc ON s.studentid = sc.studentid
-  LEFT JOIN tb_class c ON sc.classid = c.classid
-  LEFT JOIN tb_bcode b ON s.status = b.bcode
+    t.teacherid,
+    t.name,
+    t.birth,
+    t.phone,
+    t.storename,
+    t.status,
+    b.bname AS statusName,
+	LISTAGG(c.classname, ', ') WITHIN GROUP (ORDER BY c.classname) AS classNames
+  FROM tb_teacher t
+  LEFT JOIN tb_class c ON t.classid = c.classid AND c.status IN ('END')
+  LEFT JOIN tb_bcode b ON t.status = b.bcode AND b.acode = 'TEACHER'
   WHERE 
-    s.storenum = #{storeNum}
-    AND s.status = 'S_QUIT' <!-- 하드 코딩 대신 테이블 join -->
-    
-  GROUP BY s.studentid, s.name, s.phone, s.status, b.bname
+    t.storename = #{storeName}
+    AND t.status = 'T_QUIT' 
+ GROUP BY
+  	t.teacherid,
+    t.name,
+    t.birth,
+    t.phone,
+    t.storename,
+    t.status,
+    statusName   
 </select>
 	<select id="getTeacherById" parameterType="int" resultType="TeacherDto">
 		SELECT * 
 		FROM tb_teacher
 		WHERE teacherid=#{teacherId}
 	</select>
-	<insert id="insert" parameterType="int">
+	<insert id="insert" parameterType="TeacherDto">
 		INSERT INTO tb_teacher
-		(teacherid, name, storenum, phone, salary, status, birth)
-		VALUES(teacher_seq.NEXTVAL, #{name}, #{storeNum}, #{phone}, #{salary}, #{status}, #{birth})
+		(teacherid, name, storename, phone, salary, status, birth)
+		VALUES(teacher_seq.NEXTVAL, #{name}, #{storeName}, #{phone}, #{salary}, #{status}, #{birth})
 	</insert>	
-	<update id="update" parameterType="int">
+	<update id="update" parameterType="TeacherDto">
 		UPDATE tb_teacher
-		SET name=#{name}, phone=#{phone}, salary=#{salary}, status=#{status}, birth=#{birth}
+		SET name=#{name}, phone=#{phone}, storename=#{storeName} salary=#{salary}, status=#{status}, birth=#{birth}
 		WHERE teacherid=#{teacherId}
 	</update>
 	<!--  

@@ -14,9 +14,9 @@ public class StudentServiceImpl implements StudentService{
 	@Autowired StudentMapper studentMapper;
 	
 	@Override
-	public List<StudentDto> getAllStudents(int storeNum) {
+	public List<StudentDto> getAllStudents(String storeName) {
 		// TODO Auto-generated method stub
-		return studentMapper.getStudentList(storeNum);
+		return studentMapper.getStudentList(storeName);
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class StudentServiceImpl implements StudentService{
 	}
 
 	@Override
-	public StudentDto getAllClasses(int studentId) {
+	public List<StudentDto> getAllClasses(int studentId) {
 		// TODO Auto-generated method stub
 		return studentMapper.getClassHistory(studentId);
 	}

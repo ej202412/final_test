@@ -13,11 +13,11 @@ public class TeacherServiceImpl implements TeacherService{
 
 	@Autowired 
 	private TeacherMapper teacherMapper;
-	
+
 	@Override
-	public List<TeacherDto> getAllTeachers(int storeNum) {
+	public List<TeacherDto> getAllTeachers(String storeName) {
 		// TODO Auto-generated method stub
-		return teacherMapper.getAll(storeNum);
+		return teacherMapper.getTeacherList(storeName);
 	}
 
 	@Override
@@ -31,11 +31,12 @@ public class TeacherServiceImpl implements TeacherService{
 		// TODO Auto-generated method stub
 		return teacherMapper.update(dto);
 	}
-/*
+
 	@Override
-	public int deleteTeacher(int teacherId) {
+	public List<TeacherDto> getAllClasses(int teacherId) {
 		// TODO Auto-generated method stub
-		return teacherMapper.delete(teacherId);
+		return teacherMapper.getClassHistory(teacherId);
 	}
-*/
+	
+
 }

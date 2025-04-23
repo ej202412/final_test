@@ -27,10 +27,10 @@ public class StudentController {
 		return "pong";
 	}
 	
-	// students?storeNum=1 
+	// students?storeName="강남점" 
 	@GetMapping("/students")
-	public List<StudentDto> getAllStudents(@RequestParam int storeNum){
-		return studentService.getAllStudents(storeNum);
+	public List<StudentDto> getAllStudents(@RequestParam String storeName){
+		return studentService.getAllStudents(storeName);
 	}
 	
 	// students
@@ -41,9 +41,9 @@ public class StudentController {
 	}
 	
 	// students/1
-	@PatchMapping("/students/{id}")
-	public String updateStudent(@PathVariable int id, @RequestBody StudentDto dto) { //전달되는 id 를 studentId 로 StudentDto 에 사용
-		dto.setStudentId(id);
+	@PatchMapping("/students/{studentId}")
+	public String updateStudent(@PathVariable int studentId, @RequestBody StudentDto dto) { //전달되는 studentId 를 studentId 로 StudentDto 에 사용
+		dto.setStudentId(studentId);
 		studentService.updateStudent(dto);
 		return "success!";
 	}
@@ -56,7 +56,7 @@ public class StudentController {
 	*/
 	// students/class?studentId=1
 	@GetMapping("/students/class")
-	public StudentDto getAllClasses(@RequestParam int studentId){
+	public List<StudentDto> getAllClasses(@RequestParam int studentId){
 		return studentService.getAllClasses(studentId);
 	}
 }
