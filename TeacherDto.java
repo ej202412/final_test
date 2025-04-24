@@ -33,4 +33,9 @@ public class TeacherDto {
 	private String enddate;
 	private String starttime;
 	private String endtime;
+	
+	// 강사 검색 조건
+	private String condition;
+	private String keyword;
+
 }

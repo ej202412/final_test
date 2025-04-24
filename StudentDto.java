@@ -22,7 +22,8 @@ public class StudentDto {
 	
 	// 학생 목록에서 현재 수강 수업 정보(LISTAGG)
 	private String classNames;
-
+	private StudentClassHistoryDto history;
+	
 	// 학생 수강 이력 정보
 	private int classId;
 	private String className;
@@ -32,4 +33,9 @@ public class StudentDto {
 	private String enddate;
 	private String starttime;
 	private String endtime;
+	
+	// 학생 검색 조건
+	private String condition;
+	private String keyword;
+
 }

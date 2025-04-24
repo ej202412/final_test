@@ -59,4 +59,9 @@ public class StudentController {
 	public List<StudentDto> getAllClasses(@RequestParam int studentId){
 		return studentService.getAllClasses(studentId);
 	}
+	
+	@GetMapping("/students?status=study&condition=student&keyword=")
+	public List<StudentDto> getSearchResult(@RequestBody StudentDto dto){
+		return studentService.getSearchResult(dto);
+	}
 }

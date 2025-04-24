@@ -37,6 +37,12 @@ public class StudentServiceImpl implements StudentService{
 		return studentMapper.getClassHistory(studentId);
 	}
 
+	@Override
+	public List<StudentDto> getSearchResult(StudentDto dto) {
+		// TODO Auto-generated method stub
+		return studentMapper.getSearchResult(dto);
+	}
+
 	
 
 

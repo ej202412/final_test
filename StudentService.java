@@ -11,4 +11,5 @@ public interface StudentService {
 	public int updateStudent(StudentDto dto);
 	//public int deleteStudent(int studentId); 
 	public List<StudentDto> getAllClasses(int studentId);
+	public List<StudentDto> getSearchResult(StudentDto dto);
 }

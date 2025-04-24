@@ -16,5 +16,6 @@ public interface StudentMapper {
 	int update(StudentDto dto); // 학생 정보 수정 메소드
 	// int delete(int studentId);
 	// int updateCount(int storeNum); // 학생 수 업데이트 메소드
+	List<StudentDto> getSearchResult(StudentDto dto); // 검색조건에 따른 학생 목록 가져오는 메소드
 
 }
